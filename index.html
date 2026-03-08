@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VerbMaster – Verbes irréguliers 4ème</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f0e17; }
+    .app { min-height: 100vh; background: #0f0e17; font-family: 'Nunito', sans-serif; color: #fffffe; padding: 16px; }
+    .logo { font-family: 'Fredoka One', cursive; font-size: clamp(28px,5vw,44px); text-align: center; background: linear-gradient(135deg,#FF6B6B,#A29BFE,#48DBFB); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 4px; }
+    .subtitle { text-align: center; font-size: 13px; color: #a8a8b3; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase; }
+    .tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab { padding: 10px 20px; border-radius: 50px; border: 2px solid #2d2d44; background: transparent; color: #a8a8b3; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .2s; position: relative; }
+    .tab:hover { border-color: #A29BFE; color: #A29BFE; }
+    .tab.active { background: #A29BFE; border-color: #A29BFE; color: #0f0e17; box-shadow: 0 0 20px rgba(162,155,254,.4); }
+    .tab.err-active { background: #FF6B6B; border-color: #FF6B6B; color: #fff; box-shadow: 0 0 20px rgba(255,107,107,.4); }
+    .err-badge { position: absolute; top: -6px; right: -6px; background: #FF6B6B; color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+    .gfilter { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px; max-width: 700px; margin-left: auto; margin-right: auto; }
+    .gbtn { padding: 6px 14px; border-radius: 50px; border: 2px solid transparent; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: all .2s; opacity: .45; }
+    .gbtn.sel { opacity: 1; transform: scale(1.05); }
+    .pbar-wrap { background: #1e1e2e; border-radius: 50px; height: 8px; margin-bottom: 16px; overflow: hidden; }
+    .pbar-fill { height: 100%; border-radius: 50px; background: linear-gradient(90deg,#A29BFE,#48DBFB); transition: width .4s ease; }
+    .score-bar { display: flex; align-items: center; justify-content: space-between; background: #1e1e2e; border-radius: 16px; padding: 12px 20px; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .sc-num { font-family: 'Fredoka One', cursive; font-size: 26px; text-align: center; }
+    .sc-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #a8a8b3; text-align: center; }
+    .btn { padding: 12px 28px; border-radius: 50px; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; transition: all .2s; }
+    .btn-primary { background: linear-gradient(135deg,#A29BFE,#6C5CE7); color: #fff; box-shadow: 0 4px 16px rgba(162,155,254,.3); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(162,155,254,.45); }
+    .btn-secondary { background: #2d2d44; color: #fffffe; }
+    .btn-secondary:hover { background: #3d3d5e; }
+    .btn-danger { background: #FF6B6B; color: #fff; }
+    .fc-wrap { max-width: 520px; margin: 0 auto; }
+    .fc-card { background: #1e1e2e; border-radius: 24px; padding: 36px 32px; text-align: center; border: 2px solid #2d2d44; position: relative; min-height: 280px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform .2s,box-shadow .2s; user-select: none; }
+    .fc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(162,155,254,.15); }
+    .fc-badge { position: absolute; top: 16px; left: 16px; padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 800; }
+    .fc-fr { font-size: 15px; color: #a8a8b3; margin-bottom: 8px; font-weight: 600; }
+    .fc-inf { font-family: 'Fredoka One', cursive; font-size: clamp(32px,8vw,52px); line-height: 1.1; margin-bottom: 12px; }
+    .fc-hint { font-size: 12px; color: #a8a8b3; margin-top: 8px; }
+    .ans-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; width: 100%; }
+    .ans-box { background: #2d2d44; border-radius: 16px; padding: 14px 24px; flex: 1; min-width: 120px; max-width: 200px; text-align: center; }
+    .ans-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #a8a8b3; margin-bottom: 4px; }
+    .ans-val { font-family: 'Fredoka One', cursive; font-size: 22px; }
+    .fc-ctrls { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+    .qwrap { max-width: 600px; margin: 0 auto; }
+    .qbox { background: #1e1e2e; border-radius: 24px; padding: 28px 24px; text-align: center; margin-bottom: 16px; border: 2px solid #2d2d44; }
+    .q-inf { font-family: 'Fredoka One', cursive; font-size: clamp(28px,7vw,46px); }
+    .q-fr { font-size: 15px; color: #a8a8b3; margin-bottom: 8px; font-weight: 600; }
+    .q-ask { margin-top: 12px; font-size: 13px; font-weight: 700; color: #FDCB6E; text-transform: uppercase; letter-spacing: 1px; }
+    .q-badge { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; padding: 3px 10px; border-radius: 50px; margin-bottom: 10px; text-transform: uppercase; }
+    .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .opts.single-col { grid-template-columns: 1fr; }
+    .opt { padding: 18px 12px; border-radius: 16px; border: 2px solid #2d2d44; background: #1e1e2e; color: #fffffe; font-family: 'Fredoka One', cursive; font-size: 20px; cursor: pointer; transition: all .2s; text-align: center; }
+    .opt:hover:not(:disabled) { border-color: #A29BFE; background: #252538; transform: translateY(-2px); }
+    .opt.opt-ok { background: #1DD1A1; border-color: #1DD1A1; color: #0f0e17; animation: pulse .3s ease; }
+    .opt.opt-bad { background: #FF6B6B; border-color: #FF6B6B; color: #fff; animation: shake .3s ease; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    .res-card { background: #1e1e2e; border-radius: 28px; padding: 40px 32px; text-align: center; max-width: 480px; margin: 0 auto; border: 2px solid #2d2d44; }
+    .res-emoji { font-size: 64px; margin-bottom: 16px; }
+    .res-title { font-family: 'Fredoka One', cursive; font-size: 36px; margin-bottom: 8px; }
+    .res-score { font-family: 'Fredoka One', cursive; font-size: 56px; background: linear-gradient(135deg,#FF6B6B,#A29BFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .res-sub { color: #a8a8b3; margin: 8px 0 24px; font-size: 15px; }
+    .mode-picker { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .mode-btn { padding: 8px 16px; border-radius: 50px; border: 2px solid #2d2d44; background: #1e1e2e; color: #a8a8b3; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: all .2s; }
+    .mode-btn:hover { border-color: #A29BFE; color: #A29BFE; }
+    .mode-btn.active { background: rgba(162,155,254,.15); border-color: #A29BFE; color: #A29BFE; }
+    .clue-box { border-radius: 16px; padding: 18px 24px; text-align: center; margin-bottom: 16px; background: #1e1e2e; border-left: 4px solid #A29BFE; }
+    .clue-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #a8a8b3; margin-bottom: 6px; }
+    .clue-val { font-family: 'Fredoka One', cursive; font-size: clamp(22px,5vw,34px); }
+    .ffields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+    .flbl { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #a8a8b3; margin-bottom: 4px; }
+    .finput { background: #2d2d44; border: 2px solid #3d3d5e; border-radius: 12px; color: #fff; font-family: 'Fredoka One', cursive; font-size: 22px; padding: 14px 18px; width: 100%; text-align: center; outline: none; transition: border-color .2s; text-transform: uppercase; }
+    .finput:focus { border-color: #A29BFE; }
+    .finput.f-ok { border-color: #1DD1A1; background: rgba(29,209,161,.1); }
+    .finput.f-bad { border-color: #FF6B6B; background: rgba(255,107,107,.1); }
+    .fb-msg { text-align: center; font-weight: 800; font-size: 15px; padding: 10px; border-radius: 12px; margin-bottom: 12px; }
+    .fb-msg.fb-ok { background: rgba(29,209,161,.15); color: #1DD1A1; }
+    .fb-msg.fb-bad { background: rgba(255,107,107,.15); color: #FF6B6B; }
+    .correct-hint { color: #1DD1A1; font-size: 13px; margin-top: 4px; text-align: center; font-weight: 700; }
+    .tw { max-width: 760px; margin: 0 auto; overflow-x: auto; }
+    .gt-sec { margin-bottom: 24px; }
+    .gt-title { font-family: 'Fredoka One', cursive; font-size: 18px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .vtbl { width: 100%; border-collapse: separate; border-spacing: 0 4px; }
+    .vtbl th { text-align: left; padding: 8px 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #a8a8b3; }
+    .vtbl td { padding: 10px 14px; background: #1e1e2e; font-weight: 700; font-size: 15px; }
+    .vtbl td:first-child { border-radius: 12px 0 0 12px; font-size: 13px; color: #a8a8b3; font-weight: 600; }
+    .vtbl td:last-child { border-radius: 0 12px 12px 0; }
+    .vtbl .mono { font-family: 'Fredoka One', cursive; font-size: 17px; }
+    .ewrap { max-width: 700px; margin: 0 auto; }
+    .ehdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .etitle { font-family: 'Fredoka One', cursive; font-size: 24px; }
+    .estats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .estat { background: #1e1e2e; border-radius: 12px; padding: 10px 16px; text-align: center; }
+    .estat-n { font-family: 'Fredoka One', cursive; font-size: 28px; }
+    .estat-l { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #a8a8b3; }
+    .empty { text-align: center; padding: 60px 20px; color: #a8a8b3; }
+    .empty-icon { font-size: 56px; margin-bottom: 12px; }
+    .esrc { font-size: 10px; padding: 2px 8px; border-radius: 50px; font-weight: 700; }
+    .esrc-quiz { background: rgba(162,155,254,.2); color: #A29BFE; }
+    .esrc-fill { background: rgba(253,203,110,.2); color: #FDCB6E; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+
+    const VERBS = [
+      { group: "A", fr: "être",         inf: "BE",         pret: "WAS / WERE", pp: "BEEN"       },
+      { group: "A", fr: "faire",         inf: "DO",         pret: "DID",        pp: "DONE"       },
+      { group: "A", fr: "avoir",         inf: "HAVE",       pret: "HAD",        pp: "HAD"        },
+      { group: "A", fr: "venir",         inf: "COME",       pret: "CAME",       pp: "COME"       },
+      { group: "A", fr: "obtenir",       inf: "GET",        pret: "GOT",        pp: "GOT"        },
+      { group: "A", fr: "aller",         inf: "GO",         pret: "WENT",       pp: "GONE"       },
+      { group: "A", fr: "fabriquer",     inf: "MAKE",       pret: "MADE",       pp: "MADE"       },
+      { group: "A", fr: "dire",          inf: "SAY",        pret: "SAID",       pp: "SAID"       },
+      { group: "B", fr: "entendre",      inf: "HEAR",       pret: "HEARD",      pp: "HEARD"      },
+      { group: "B", fr: "voir",          inf: "SEE",        pret: "SAW",        pp: "SEEN"       },
+      { group: "B", fr: "sentir",        inf: "SMELL",      pret: "SMELT",      pp: "SMELT"      },
+      { group: "C", fr: "couper",        inf: "CUT",        pret: "CUT",        pp: "CUT"        },
+      { group: "C", fr: "coûter",        inf: "COST",       pret: "COST",       pp: "COST"       },
+      { group: "C", fr: "frapper",       inf: "HIT",        pret: "HIT",        pp: "HIT"        },
+      { group: "C", fr: "blesser",       inf: "HURT",       pret: "HURT",       pp: "HURT"       },
+      { group: "C", fr: "laisser",       inf: "LET",        pret: "LET",        pp: "LET"        },
+      { group: "C", fr: "mettre",        inf: "PUT",        pret: "PUT",        pp: "PUT"        },
+      { group: "C", fr: "lire",          inf: "READ",       pret: "READ",       pp: "READ"       },
+      { group: "C", fr: "fermer",        inf: "SHUT",       pret: "SHUT",       pp: "SHUT"       },
+      { group: "C", fr: "éclater",       inf: "BURST",      pret: "BURST",      pp: "BURST"      },
+      { group: "C", fr: "parier",        inf: "BET",        pret: "BET",        pp: "BET"        },
+      { group: "C", fr: "étaler",        inf: "SPREAD",     pret: "SPREAD",     pp: "SPREAD"     },
+      { group: "D", fr: "brûler",        inf: "BURN",       pret: "BURNT",      pp: "BURNT"      },
+      { group: "D", fr: "construire",    inf: "BUILD",      pret: "BUILT",      pp: "BUILT"      },
+      { group: "D", fr: "dépenser",      inf: "SPEND",      pret: "SPENT",      pp: "SPENT"      },
+      { group: "D", fr: "envoyer",       inf: "SEND",       pret: "SENT",       pp: "SENT"       },
+      { group: "D", fr: "apprendre",     inf: "LEARN",      pret: "LEARNT",     pp: "LEARNT"     },
+      { group: "D", fr: "prêter",        inf: "LEND",       pret: "LENT",       pp: "LENT"       },
+      { group: "D", fr: "tirer",         inf: "SHOOT",      pret: "SHOT",       pp: "SHOT"       },
+      { group: "D", fr: "perdre",        inf: "LOSE",       pret: "LOST",       pp: "LOST"       },
+      { group: "D", fr: "s'asseoir",     inf: "SIT",        pret: "SAT",        pp: "SAT"        },
+      { group: "D", fr: "épeler",        inf: "SPELL",      pret: "SPELT",      pp: "SPELT"      },
+      { group: "D", fr: "allumer",       inf: "LIGHT",      pret: "LIT",        pp: "LIT"        },
+      { group: "E", fr: "se tenir",      inf: "STAND",      pret: "STOOD",      pp: "STOOD"      },
+      { group: "E", fr: "comprendre",    inf: "UNDERSTAND", pret: "UNDERSTOOD", pp: "UNDERSTOOD" },
+      { group: "E", fr: "commencer",     inf: "BEGIN",      pret: "BEGAN",      pp: "BEGUN"      },
+      { group: "E", fr: "boire",         inf: "DRINK",      pret: "DRANK",      pp: "DRUNK"      },
+      { group: "E", fr: "sonner",        inf: "RING",       pret: "RANG",       pp: "RUNG"       },
+      { group: "E", fr: "chanter",       inf: "SING",       pret: "SANG",       pp: "SUNG"       },
+      { group: "E", fr: "nager",         inf: "SWIM",       pret: "SWAM",       pp: "SWUM"       },
+      { group: "G", fr: "souffler",      inf: "BLOW",       pret: "BLEW",       pp: "BLOWN"      },
+      { group: "G", fr: "dessiner",      inf: "DRAW",       pret: "DREW",       pp: "DRAWN"      },
+      { group: "G", fr: "voler",         inf: "FLY",        pret: "FLEW",       pp: "FLOWN"      },
+      { group: "G", fr: "grandir",       inf: "GROW",       pret: "GREW",       pp: "GROWN"      },
+      { group: "G", fr: "savoir",        inf: "KNOW",       pret: "KNEW",       pp: "KNOWN"      },
+      { group: "G", fr: "lancer",        inf: "THROW",      pret: "THREW",      pp: "THROWN"     },
+      { group: "H", fr: "apporter",      inf: "BRING",      pret: "BROUGHT",    pp: "BROUGHT"    },
+      { group: "H", fr: "acheter",       inf: "BUY",        pret: "BOUGHT",     pp: "BOUGHT"     },
+      { group: "H", fr: "attraper",      inf: "CATCH",      pret: "CAUGHT",     pp: "CAUGHT"     },
+      { group: "H", fr: "se battre",     inf: "FIGHT",      pret: "FOUGHT",     pp: "FOUGHT"     },
+      { group: "H", fr: "enseigner",     inf: "TEACH",      pret: "TAUGHT",     pp: "TAUGHT"     },
+      { group: "H", fr: "penser",        inf: "THINK",      pret: "THOUGHT",    pp: "THOUGHT"    },
+      { group: "I", fr: "saigner",       inf: "BLEED",      pret: "BLED",       pp: "BLED"       },
+      { group: "I", fr: "nourrir",       inf: "FEED",       pret: "FED",        pp: "FED"        },
+      { group: "I", fr: "ressentir",     inf: "FEEL",       pret: "FELT",       pp: "FELT"       },
+      { group: "I", fr: "garder",        inf: "KEEP",       pret: "KEPT",       pp: "KEPT"       },
+      { group: "I", fr: "rencontrer",    inf: "MEET",       pret: "MET",        pp: "MET"        },
+      { group: "I", fr: "dormir",        inf: "SLEEP",      pret: "SLEPT",      pp: "SLEPT"      },
+      { group: "I", fr: "balayer",       inf: "SWEEP",      pret: "SWEPT",      pp: "SWEPT"      },
+      { group: "I", fr: "vouloir dire",  inf: "MEAN",       pret: "MEANT",      pp: "MEANT"      },
+      { group: "I", fr: "mener",         inf: "LEAD",       pret: "LED",        pp: "LED"        },
+      { group: "I", fr: "rêver",         inf: "DREAM",      pret: "DREAMT",     pp: "DREAMT"     },
+      { group: "I", fr: "partir",        inf: "LEAVE",      pret: "LEFT",       pp: "LEFT"       },
+      { group: "J", fr: "supporter",     inf: "BEAR",       pret: "BORE",       pp: "BORN"       },
+      { group: "J", fr: "jurer",         inf: "SWEAR",      pret: "SWORE",      pp: "SWORN"      },
+      { group: "J", fr: "déchirer",      inf: "TEAR",       pret: "TORE",       pp: "TORN"       },
+      { group: "J", fr: "porter",        inf: "WEAR",       pret: "WORE",       pp: "WORN"       },
+      { group: "K", fr: "mordre",        inf: "BITE",       pret: "BIT",        pp: "BITTEN"     },
+      { group: "K", fr: "casser",        inf: "BREAK",      pret: "BROKE",      pp: "BROKEN"     },
+      { group: "K", fr: "choisir",       inf: "CHOOSE",     pret: "CHOSE",      pp: "CHOSEN"     },
+      { group: "K", fr: "conduire",      inf: "DRIVE",      pret: "DROVE",      pp: "DRIVEN"     },
+      { group: "K", fr: "manger",        inf: "EAT",        pret: "ATE",        pp: "EATEN"      },
+      { group: "K", fr: "tomber",        inf: "FALL",       pret: "FELL",       pp: "FALLEN"     },
+      { group: "K", fr: "donner",        inf: "GIVE",       pret: "GAVE",       pp: "GIVEN"      },
+      { group: "K", fr: "oublier",       inf: "FORGET",     pret: "FORGOT",     pp: "FORGOTTEN"  },
+      { group: "K", fr: "pardonner",     inf: "FORGIVE",    pret: "FORGAVE",    pp: "FORGIVEN"   },
+      { group: "K", fr: "interdire",     inf: "FORBID",     pret: "FORBADE",    pp: "FORBIDDEN"  },
+      { group: "K", fr: "geler",         inf: "FREEZE",     pret: "FROZE",      pp: "FROZEN"     },
+      { group: "K", fr: "cacher",        inf: "HIDE",       pret: "HID",        pp: "HIDDEN"     },
+      { group: "K", fr: "monter",        inf: "RIDE",       pret: "RODE",       pp: "RIDDEN"     },
+      { group: "K", fr: "se lever",      inf: "RISE",       pret: "ROSE",       pp: "RISEN"      },
+      { group: "K", fr: "secouer",       inf: "SHAKE",      pret: "SHOOK",      pp: "SHAKEN"     },
+      { group: "K", fr: "parler",        inf: "SPEAK",      pret: "SPOKE",      pp: "SPOKEN"     },
+      { group: "K", fr: "voler",         inf: "STEAL",      pret: "STOLE",      pp: "STOLEN"     },
+      { group: "K", fr: "prendre",       inf: "TAKE",       pret: "TOOK",       pp: "TAKEN"      },
+      { group: "K", fr: "réveiller",     inf: "WAKE UP",    pret: "WOKE",       pp: "WOKEN"      },
+      { group: "K", fr: "écrire",        inf: "WRITE",      pret: "WROTE",      pp: "WRITTEN"    },
+      { group: "L", fr: "vendre",        inf: "SELL",       pret: "SOLD",       pp: "SOLD"       },
+      { group: "L", fr: "raconter",      inf: "TELL",       pret: "TOLD",       pp: "TOLD"       },
+      { group: "L", fr: "briller",       inf: "SHINE",      pret: "SHONE",      pp: "SHONE"      },
+      { group: "L", fr: "trouver",       inf: "FIND",       pret: "FOUND",      pp: "FOUND"      },
+      { group: "L", fr: "suspendre",     inf: "HANG",       pret: "HUNG",       pp: "HUNG"       },
+      { group: "L", fr: "tenir",         inf: "HOLD",       pret: "HELD",       pp: "HELD"       },
+      { group: "L", fr: "gagner",        inf: "WIN",        pret: "WON",        pp: "WON"        },
+      { group: "L", fr: "payer",         inf: "PAY",        pret: "PAID",       pp: "PAID"       },
+      { group: "L", fr: "disposer",      inf: "LAY",        pret: "LAID",       pp: "LAID"       },
+      { group: "L", fr: "creuser",       inf: "DIG",        pret: "DUG",        pp: "DUG"        },
+      { group: "L", fr: "gâcher",        inf: "SPOIL",      pret: "SPOILT",     pp: "SPOILT"     },
+      { group: "M", fr: "devenir",       inf: "BECOME",     pret: "BECAME",     pp: "BECOME"     },
+      { group: "M", fr: "s'allonger",    inf: "LIE",        pret: "LAY",        pp: "LAIN"       },
+      { group: "M", fr: "courir",        inf: "RUN",        pret: "RAN",        pp: "RUN"        },
+      { group: "M", fr: "montrer",       inf: "SHOW",       pret: "SHOWED",     pp: "SHOWN"      },
+    ];
+
+    const GROUP_LABELS = {
+      A:"⭐ Verbes essentiels", B:"👁️ Perception", C:"🔄 Sans changement",
+      D:"🔤 Aiment le T", E:"🔁 I→A→U", G:"💨 -EW / -AWN",
+      H:"💡 -GHT", I:"/iː/ → /e/", J:"📖 -EAR→-ORE→-ORN",
+      K:"🔚 Terminaisons -EN", L:"✌️ Prétérit = PP", M:"🎲 Divers",
+    };
+    const GROUP_COLORS = {
+      A:"#FF6B6B", B:"#FF9F43", C:"#48DBFB", D:"#1DD1A1",
+      E:"#A29BFE", G:"#FD79A8", H:"#FDCB6E", I:"#6C5CE7",
+      J:"#00B894", K:"#E17055", L:"#74B9FF", M:"#55EFC4",
+    };
+    const FILL_MODES = [
+      { id:"random", label:"🎲 Aléatoire",            clueField:null   },
+      { id:"fr",     label:"🇫🇷 Depuis Français",      clueField:"fr"   },
+      { id:"inf",    label:"🔤 Depuis Infinitif",      clueField:"inf"  },
+      { id:"pret",   label:"⏮️ Depuis Prétérit",      clueField:"pret" },
+      { id:"pp",     label:"📌 Depuis PP",             clueField:"pp"   },
+    ];
+    const BLANK_FIELDS = { fr:["inf","pret","pp"], inf:["pret","pp"], pret:["inf","pp"], pp:["inf","pret"] };
+    const FIELD_LABELS  = { fr:"🇫🇷 Français", inf:"Infinitif", pret:"Prétérit", pp:"Past Participle" };
+    const FIELD_COLORS  = { fr:"#fffffe", inf:"#A29BFE", pret:"#FDCB6E", pp:"#48DBFB" };
+
+    function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+    function getWrongAnswers(correct, field, allVerbs, count, sameGroup) {
+      const samePool = sameGroup
+        ? [...new Set(allVerbs.filter(v => v.group===sameGroup && v[field]!==correct).map(v=>v[field]))]
+        : [];
+      const otherPool = [...new Set(allVerbs.filter(v => v[field]!==correct).map(v=>v[field]))];
+      const combined = [...shuffle(samePool), ...shuffle(otherPool).filter(x=>!samePool.includes(x))];
+      const result=[]; const seen=new Set();
+      for(const x of combined){if(!seen.has(x)){seen.add(x);result.push(x);}if(result.length===count)break;}
+      return result;
+    }
+
+    function buildQuizQuestions(verbs) {
+      const pool = shuffle(verbs).slice(0, Math.min(20, verbs.length));
+      return pool.map((v, i) => {
+        const r = i % 4;
+        if (r===0) { const c=v.inf; return {type:"reverse", verb:v, correct:c, options:shuffle([c,...getWrongAnswers(c,"inf",verbs,3,v.group)])}; }
+        if (r===1) { const c=v.inf; return {type:"fr_only", verb:v, correct:c, options:shuffle([c,...getWrongAnswers(c,"inf",verbs,3,v.group)])}; }
+        if (r===2) { const c=`${v.pret} / ${v.pp}`; const w=shuffle(verbs.filter(x=>x.inf!==v.inf)).slice(0,3).map(x=>`${x.pret} / ${x.pp}`); return {type:"pair",verb:v,correct:c,options:shuffle([c,...w])}; }
+        const f=Math.random()<.5?"pret":"pp"; const c=v[f];
+        return {type:"forward",verb:v,field:f,correct:c,options:shuffle([c,...getWrongAnswers(c,f,verbs,3,v.group)])};
+      });
+    }
+
+    // ── APP ROOT ──
+    function App() {
+      const [tab, setTab] = useState("quiz");
+      const [selGroups, setSelGroups] = useState(Object.keys(GROUP_LABELS));
+      const [errors, setErrors] = useState([]);
+      const filtered = VERBS.filter(v => selGroups.includes(v.group));
+      const addError = useCallback(e => setErrors(p=>[...p,{...e,id:Date.now()+Math.random()}]),[]);
+      const toggleGroup = g => setSelGroups(p => p.includes(g) ? (p.length>1?p.filter(x=>x!==g):p) : [...p,g]);
+      const showFilter = !["table","errors"].includes(tab);
+      return (
+        <div className="app">
+          <div className="logo">🇬🇧 VerbMaster</div>
+          <div className="subtitle">Verbes irréguliers · 4ème</div>
+          <div className="tabs">
+            {[["quiz","🎯 QCM"],["fill","✏️ Compléter"],["flash","🃏 Flashcards"],["table","📋 Tableau"]].map(([id,lbl])=>(
+              <button key={id} className={`tab${tab===id?" active":""}`} onClick={()=>setTab(id)}>{lbl}</button>
+            ))}
+            <button className={`tab${tab==="errors"?" err-active":""}`} onClick={()=>setTab("errors")}>
+              ❌ Erreurs
+              {errors.length>0 && <span className="err-badge">{errors.length>99?"99+":errors.length}</span>}
+            </button>
+          </div>
+          {showFilter && (
+            <div className="gfilter">
+              <button className="btn btn-secondary" style={{fontSize:12,padding:"6px 14px"}} onClick={()=>setSelGroups(Object.keys(GROUP_LABELS))}>Tout</button>
+              {Object.entries(GROUP_LABELS).map(([g,lbl])=>(
+                <button key={g} className={`gbtn${selGroups.includes(g)?" sel":""}`}
+                  style={{background:selGroups.includes(g)?GROUP_COLORS[g]+"33":"#1e1e2e",borderColor:GROUP_COLORS[g],color:selGroups.includes(g)?GROUP_COLORS[g]:"#a8a8b3"}}
+                  onClick={()=>toggleGroup(g)}>{lbl}</button>
+              ))}
+            </div>
+          )}
+          {tab==="flash"  && <FlashCards verbs={filtered}/>}
+          {tab==="quiz"   && <Quiz verbs={filtered} addError={addError}/>}
+          {tab==="fill"   && <FillBlank verbs={filtered} addError={addError}/>}
+          {tab==="table"  && <TableView/>}
+          {tab==="errors" && <Errors errors={errors} onClear={()=>setErrors([])}/>}
+        </div>
+      );
+    }
+
+    // ── FLASHCARDS ──
+    function FlashCards({verbs}) {
+      const [deck,setDeck]=useState(()=>shuffle(verbs));
+      const [idx,setIdx]=useState(0);
+      const [rev,setRev]=useState(false);
+      useEffect(()=>{setDeck(shuffle(verbs));setIdx(0);setRev(false);},[verbs]);
+      const card=deck[idx];
+      if(!card) return <p style={{textAlign:"center",color:"#a8a8b3"}}>Aucun verbe.</p>;
+      return (
+        <div className="fc-wrap">
+          <p style={{textAlign:"center",fontSize:12,color:"#a8a8b3",marginBottom:16}}>{idx+1} / {deck.length}</p>
+          <div className="pbar-wrap"><div className="pbar-fill" style={{width:`${((idx+1)/deck.length)*100}%`}}/></div>
+          <div className="fc-card" onClick={()=>setRev(r=>!r)}>
+            <span className="fc-badge" style={{background:GROUP_COLORS[card.group]+"22",color:GROUP_COLORS[card.group]}}>Groupe {card.group}</span>
+            <div className="fc-fr">{card.fr}</div>
+            <div className="fc-inf" style={{color:GROUP_COLORS[card.group]}}>{card.inf}</div>
+            {!rev && <div className="fc-hint">👆 Clique pour révéler</div>}
+            {rev && <div className="ans-row">
+              <div className="ans-box"><div className="ans-lbl">Prétérit</div><div className="ans-val" style={{color:"#FDCB6E"}}>{card.pret}</div></div>
+              <div className="ans-box"><div className="ans-lbl">Past Participle</div><div className="ans-val" style={{color:"#48DBFB"}}>{card.pp}</div></div>
+            </div>}
+          </div>
+          <div className="fc-ctrls">
+            <button className="btn btn-secondary" onClick={()=>{setIdx(i=>(i-1+deck.length)%deck.length);setRev(false);}}>← Préc.</button>
+            <button className="btn btn-primary" onClick={()=>{setIdx(i=>(i+1)%deck.length);setRev(false);}}>Suiv. →</button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── QUIZ ──
+    function Quiz({verbs,addError}) {
+      const [questions,setQuestions]=useState([]);
+      const [qi,setQi]=useState(0);
+      const [selected,setSelected]=useState(null);
+      const [score,setScore]=useState(0);
+      const [done,setDone]=useState(false);
+      const [streak,setStreak]=useState(0);
+      const [best,setBest]=useState(0);
+      const reset=useCallback(()=>{setQuestions(buildQuizQuestions(verbs));setQi(0);setSelected(null);setScore(0);setDone(false);setStreak(0);setBest(0);},[verbs]);
+      useEffect(()=>{reset();},[reset]);
+      if(!questions.length) return null;
+      if(done){
+        const pct=Math.round((score/questions.length)*100);
+        const emoji=pct>=90?"🏆":pct>=70?"🌟":pct>=50?"💪":"📚";
+        const msg=pct>=90?"Excellent !":pct>=70?"Très bien !":pct>=50?"Pas mal !":"Continue !";
+        return(<div className="res-card"><div className="res-emoji">{emoji}</div><div className="res-title">{msg}</div><div className="res-score">{score}/{questions.length}</div><div className="res-sub">{pct}% · Meilleure série : {best} 🔥</div><button className="btn btn-primary" onClick={reset}>🔄 Rejouer</button></div>);
+      }
+      const q=questions[qi];
+      const CFGS={
+        forward:{clue:<><div className="q-fr">{q.verb.fr}</div><div className="q-inf" style={{color:GROUP_COLORS[q.verb.group]}}>{q.verb.inf}</div></>,asking:`→ Quel est le ${q.field==="pret"?"PRÉTÉRIT":"PAST PARTICIPLE"} ?`,badge:{label:q.field==="pret"?"PRÉTÉRIT":"PAST PARTICIPLE",color:q.field==="pret"?"#FDCB6E":"#48DBFB"}},
+        reverse:{clue:<><div className="q-fr">Prétérit :</div><div className="q-inf" style={{color:"#FDCB6E"}}>{q.verb.pret}</div></>,asking:"→ Quel est l'INFINITIF ?",badge:{label:"REVERSE 🔄",color:"#FF6B6B"}},
+        fr_only:{clue:<div className="q-fr" style={{fontSize:18,color:"#fffffe",fontWeight:800}}>🇫🇷 « {q.verb.fr} »</div>,asking:"→ Quel est l'INFINITIF anglais ?",badge:{label:"FRANÇAIS SEULEMENT",color:"#FF9F43"}},
+        pair:{clue:<><div className="q-fr">{q.verb.fr}</div><div className="q-inf" style={{color:GROUP_COLORS[q.verb.group]}}>{q.verb.inf}</div></>,asking:"→ Bonne paire PRÉTÉRIT / PAST PARTICIPLE ?",badge:{label:"PAIRE 🎯",color:"#A29BFE"}},
+      };
+      const cfg=CFGS[q.type];
+      const choose=opt=>{
+        if(selected!==null) return;
+        setSelected(opt);
+        const ok=opt===q.correct;
+        if(ok){setScore(s=>s+1);const ns=streak+1;setStreak(ns);setBest(b=>Math.max(b,ns));}
+        else{setStreak(0);addError({verb:q.verb,source:"quiz",field:q.field||null,given:opt,expected:q.correct});}
+        setTimeout(()=>{if(qi+1>=questions.length)setDone(true);else{setQi(i=>i+1);setSelected(null);}},1100);
+      };
+      return(
+        <div className="qwrap">
+          <div className="score-bar">
+            <div><div className="sc-num" style={{color:"#1DD1A1"}}>{score}</div><div className="sc-lbl">✅ Correct</div></div>
+            <div><div className="sc-num" style={{color:"#FDCB6E"}}>{streak} 🔥</div><div className="sc-lbl">Série</div></div>
+            <div><div className="sc-num" style={{color:"#a8a8b3"}}>{qi+1}/{questions.length}</div><div className="sc-lbl">Question</div></div>
+          </div>
+          <div className="pbar-wrap" style={{marginBottom:16}}><div className="pbar-fill" style={{width:`${(qi/questions.length)*100}%`}}/></div>
+          <div className="qbox">
+            <span className="q-badge" style={{background:cfg.badge.color+"22",color:cfg.badge.color}}>{cfg.badge.label}</span>
+            {cfg.clue}
+            <div className="q-ask">{cfg.asking}</div>
+          </div>
+          <div className={`opts${q.type==="pair"?" single-col":""}`}>
+            {q.options.map(opt=>{
+              let cls="opt";
+              if(selected!==null){if(opt===q.correct)cls+=" opt-ok";else if(opt===selected)cls+=" opt-bad";}
+              return <button key={opt} className={cls} onClick={()=>choose(opt)} disabled={selected!==null} style={q.type==="pair"?{fontSize:17}:{}}>{opt}</button>;
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ── FILL IN THE BLANK ──
+    function FillBlank({verbs,addError}) {
+      const [modeId,setModeId]=useState("random");
+      const [deck,setDeck]=useState([]);
+      const [qi,setQi]=useState(0);
+      const [inputs,setInputs]=useState({});
+      const [feedback,setFeedback]=useState(null);
+      const [score,setScore]=useState(0);
+      const [done,setDone]=useState(false);
+      const buildDeck=useCallback(()=>{
+        const clueFields=["fr","inf","pret","pp"];
+        const d=shuffle(verbs).slice(0,Math.min(15,verbs.length)).map(v=>{
+          const clue=modeId==="random"?clueFields[Math.floor(Math.random()*4)]:FILL_MODES.find(m=>m.id===modeId).clueField;
+          const blanks=BLANK_FIELDS[clue]; const emptyInputs={};
+          blanks.forEach(f=>{emptyInputs[f]="";});
+          return {verb:v,clue,blanks,emptyInputs};
+        });
+        setDeck(d);setQi(0);setInputs(d[0]?{...d[0].emptyInputs}:{});setFeedback(null);setScore(0);setDone(false);
+      },[verbs,modeId]);
+      useEffect(()=>{buildDeck();},[buildDeck]);
+      const card=deck[qi]; const TOTAL=deck.length;
+      const norm=s=>s.trim().toUpperCase().replace(/\s+/g," ");
+      const check=()=>{
+        if(feedback||!card) return;
+        const results={}; let allOk=true;
+        card.blanks.forEach(f=>{const ok=norm(inputs[f]||"")===norm(card.verb[f]);results[f]=ok;if(!ok)allOk=false;});
+        if(!allOk) card.blanks.forEach(f=>{if(!results[f])addError({verb:card.verb,source:"fill",field:f,given:inputs[f]||"(vide)",expected:card.verb[f]});});
+        if(allOk)setScore(s=>s+1);
+        setFeedback({ok:allOk,results});
+      };
+      const next=()=>{
+        if(qi+1>=TOTAL){setDone(true);return;}
+        const ni=qi+1;setQi(ni);setInputs({...deck[ni].emptyInputs});setFeedback(null);
+      };
+      if(done||(TOTAL>0&&!card)){
+        const pct=Math.round((score/TOTAL)*100);
+        return(<div className="res-card"><div className="res-emoji">{pct>=80?"🏆":pct>=60?"🌟":"📚"}</div><div className="res-title">{pct>=80?"Bravo !":pct>=60?"Bien joué !":"Continue !"}</div><div className="res-score">{score}/{TOTAL}</div><div className="res-sub">{pct}% de bonnes réponses</div><button className="btn btn-primary" onClick={buildDeck}>🔄 Recommencer</button></div>);
+      }
+      if(!card) return null;
+      return(
+        <div className="qwrap">
+          <div className="mode-picker">
+            {FILL_MODES.map(m=><button key={m.id} className={`mode-btn${modeId===m.id?" active":""}`} onClick={()=>setModeId(m.id)}>{m.label}</button>)}
+          </div>
+          <div className="score-bar">
+            <div><div className="sc-num" style={{color:"#1DD1A1"}}>{score}</div><div className="sc-lbl">✅ Correct</div></div>
+            <div><div className="sc-num" style={{color:"#a8a8b3"}}>{qi+1}/{TOTAL}</div><div className="sc-lbl">Question</div></div>
+          </div>
+          <div className="pbar-wrap" style={{marginBottom:16}}><div className="pbar-fill" style={{width:`${(qi/TOTAL)*100}%`}}/></div>
+          <div className="clue-box" style={{borderLeftColor:FIELD_COLORS[card.clue]}}>
+            <div className="clue-lbl">{FIELD_LABELS[card.clue]}</div>
+            <div className="clue-val" style={{color:FIELD_COLORS[card.clue]}}>{card.verb[card.clue]}</div>
+            {card.clue!=="fr"&&<div style={{fontSize:13,color:"#a8a8b3",marginTop:4}}>{card.verb.fr}</div>}
+          </div>
+          <div className="ffields">
+            {card.blanks.map(f=>{
+              const isOk=feedback?feedback.results[f]:null;
+              return(
+                <div key={f}>
+                  <div className="flbl" style={{color:FIELD_COLORS[f]}}>{FIELD_LABELS[f]}</div>
+                  <input className={`finput${isOk===true?" f-ok":isOk===false?" f-bad":""}`} value={inputs[f]||""} onChange={e=>setInputs(p=>({...p,[f]:e.target.value}))} placeholder="?" disabled={!!feedback} onKeyDown={e=>{if(e.key==="Enter"){if(!feedback)check();else next();}}}/>
+                  {feedback&&isOk===false&&<div className="correct-hint">✓ {card.verb[f]}</div>}
+                </div>
+              );
+            })}
+          </div>
+          {feedback&&<div className={`fb-msg${feedback.ok?" fb-ok":" fb-bad"}`}>{feedback.ok?"✅ Parfait !":"❌ Pas tout à fait..."}</div>}
+          {!feedback?<button className="btn btn-primary" style={{width:"100%"}} onClick={check}>Vérifier</button>:<button className="btn btn-primary" style={{width:"100%"}} onClick={next}>{qi+1>=TOTAL?"Voir les résultats →":"Suivant →"}</button>}
+        </div>
+      );
+    }
+
+    // ── ERRORS ──
+    function Errors({errors,onClear}) {
+      const byVerb={};
+      errors.forEach(e=>{const k=e.verb.inf;if(!byVerb[k])byVerb[k]={verb:e.verb,entries:[]};byVerb[k].entries.push(e);});
+      const sorted=Object.values(byVerb).sort((a,b)=>b.entries.length-a.entries.length);
+      if(!errors.length) return(<div className="empty"><div className="empty-icon">🎉</div><div style={{fontWeight:700,fontSize:16,marginBottom:8}}>Aucune erreur pour l'instant !</div><div style={{fontSize:14}}>Fais un QCM ou un exercice pour voir ton historique ici.</div></div>);
+      return(
+        <div className="ewrap">
+          <div className="ehdr">
+            <div className="etitle">📊 Historique des erreurs</div>
+            <button className="btn btn-danger" style={{fontSize:13,padding:"8px 18px"}} onClick={onClear}>🗑️ Effacer tout</button>
+          </div>
+          <div className="estats">
+            <div className="estat"><div className="estat-n" style={{color:"#FF6B6B"}}>{errors.length}</div><div className="estat-l">Total erreurs</div></div>
+            <div className="estat"><div className="estat-n" style={{color:"#FDCB6E"}}>{sorted.length}</div><div className="estat-l">Verbes à revoir</div></div>
+            <div className="estat" style={{flex:1}}><div className="estat-n" style={{color:"#A29BFE",fontSize:20}}>{sorted[0]?.verb.inf||"—"}</div><div className="estat-l">Le plus difficile</div></div>
+          </div>
+          {sorted.map(({verb,entries})=>(
+            <div key={verb.inf} style={{marginBottom:24}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexWrap:"wrap"}}>
+                <span style={{background:GROUP_COLORS[verb.group]+"22",color:GROUP_COLORS[verb.group],padding:"3px 10px",borderRadius:50,fontSize:11,fontWeight:800}}>Groupe {verb.group}</span>
+                <span style={{fontFamily:"'Fredoka One',cursive",fontSize:20,color:GROUP_COLORS[verb.group]}}>{verb.inf}</span>
+                <span style={{color:"#a8a8b3",fontSize:13}}>— {verb.fr}</span>
+                <span style={{marginLeft:"auto",background:"rgba(255,107,107,.15)",color:"#FF6B6B",fontFamily:"'Fredoka One',cursive",fontSize:18,padding:"2px 12px",borderRadius:50}}>{entries.length}×</span>
+              </div>
+              <div style={{background:"#1e1e2e",borderRadius:12,padding:"12px 16px",marginBottom:6,display:"flex",gap:20,flexWrap:"wrap",borderLeft:`4px solid ${GROUP_COLORS[verb.group]}`}}>
+                {["inf","pret","pp"].map(f=>(<div key={f}><div style={{fontSize:9,textTransform:"uppercase",letterSpacing:1,color:"#a8a8b3",marginBottom:2}}>{FIELD_LABELS[f]}</div><div style={{fontFamily:"'Fredoka One',cursive",fontSize:17,color:FIELD_COLORS[f]}}>{verb[f]}</div></div>))}
+              </div>
+              {entries.map((e,i)=>(
+                <div key={e.id||i} style={{background:"#16162a",borderRadius:10,padding:"8px 16px",marginBottom:4,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+                  <span className={`esrc ${e.source==="quiz"?"esrc-quiz":"esrc-fill"}`}>{e.source==="quiz"?"🎯 QCM":"✏️ Complet."}</span>
+                  {e.field&&<span style={{fontSize:12,color:"#a8a8b3"}}>{FIELD_LABELS[e.field]}</span>}
+                  <span style={{color:"#FF6B6B",fontFamily:"'Fredoka One',cursive",fontSize:15,textDecoration:"line-through"}}>{e.given}</span>
+                  <span style={{color:"#a8a8b3"}}>→</span>
+                  <span style={{color:"#1DD1A1",fontFamily:"'Fredoka One',cursive",fontSize:15}}>{e.expected}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ── TABLE ──
+    function TableView() {
+      return(
+        <div className="tw">
+          {Object.entries(GROUP_LABELS).map(([g,label])=>{
+            const gv=VERBS.filter(v=>v.group===g);
+            return(
+              <div className="gt-sec" key={g}>
+                <div className="gt-title" style={{color:GROUP_COLORS[g]}}>
+                  <span style={{background:GROUP_COLORS[g]+"22",padding:"2px 12px",borderRadius:50,fontSize:14}}>Groupe {g}</span>{label}
+                </div>
+                <table className="vtbl">
+                  <thead><tr><th>🇫🇷 Français</th><th>Infinitif</th><th>Prétérit</th><th>Past Participle</th></tr></thead>
+                  <tbody>{gv.map((v,i)=>(
+                    <tr key={i}>
+                      <td>{v.fr}</td>
+                      <td className="mono" style={{color:GROUP_COLORS[g]}}>{v.inf}</td>
+                      <td className="mono" style={{color:"#FDCB6E"}}>{v.pret}</td>
+                      <td className="mono" style={{color:"#48DBFB"}}>{v.pp}</td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+  </script>
+</body>
+</html>
